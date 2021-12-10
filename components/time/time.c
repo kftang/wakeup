@@ -2,8 +2,10 @@
 #include "freertos/FreeRTOS.h"
 
 #include "time.h"
+#include "sound.h"
 
 volatile uint32_t epoch_time = 0;
+volatile uint32_t alarm_time = 0;
 
 void IRAM_ATTR timer_tg0_isr(void * args) {
 	//Reset irq and set for next time
@@ -11,6 +13,9 @@ void IRAM_ATTR timer_tg0_isr(void * args) {
     TIMERG0.hw_timer[0].config.alarm_en = 1;
 
     epoch_time++;
+    if (epoch_time == alarm_time) {
+        sound_play();
+    }
 }
 
 int time_get_hours() {

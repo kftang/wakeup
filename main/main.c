@@ -24,6 +24,7 @@
 #include "seven_seg.h"
 #include "gpio.h"
 #include "time.h"
+#include "sound.h"
 #include "tcp_server.h"
 #include "lwip/sockets.h"
 
@@ -110,6 +111,8 @@ void app_main(void) {
     gpio_peripheral_init(peripherals, 1);
 
     time_init();
+
+    sound_init(23, 32, 13);
 
     ESP_ERROR_CHECK(esp_netif_init());
 

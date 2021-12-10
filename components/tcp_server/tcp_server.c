@@ -12,6 +12,9 @@
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
 
+#include "time.h"
+#include "sound.h"
+
 #define PORT                  1337
 #define KEEPALIVE_IDLE        5
 #define KEEPALIVE_INTERVAL    5
@@ -34,14 +37,19 @@ void process_commands(const int sock) {
             ESP_LOGE(TAG, "Error occurred during receiving: errno %d", errno);
         } else if (len == 0) {
             ESP_LOGW(TAG, "Connection closed");
-        } else if (strstr(rx_buffer, "set_time")) {
-
         } else if (strstr(rx_buffer, "set_alarm")) {
-
-        } else if (strstr(rx_buffer, "stop_alarm")) {
-
-        } else if (strstr(rx_buffer, "snooze_alarm")) {
-
+            sscanf(rx_buffer + strlen("set_alarm") + 1, " %d", &alarm_time);
+            ESP_LOGI(TAG, "alarm set to %d", alarm_time);
+        } else if (strstr(rx_buffer, "stop")) {
+            alarm_time = 0;
+            sound_stop();
+        } else if (strstr(rx_buffer, "snooze")) {
+            // add 5 minutes to alarm
+            alarm_time += 5 * 60;
+            sound_stop();
+        } else if (strncmp(rx_buffer, "play", 4) == 0) {
+            ESP_LOGI(TAG, "Playing sound");
+            sound_play();
         } else {
             // send() can return less bytes than supplied length.
             // Walk-around for robust implementation.
