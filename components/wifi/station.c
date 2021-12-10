@@ -18,6 +18,8 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+// ESP32 MAC Address: 4c:11:ae:90:5c:18	
+
 /* The examples use WiFi configuration that you can set via project configuration menu
 
    If you'd rather not, just change the below entries to strings with
