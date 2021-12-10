@@ -14,7 +14,19 @@
 #include "esp_spi_flash.h"
 #include "nvs_flash.h"
 
+#include "driver/gpio.h"
+
 #include "station.h"
+#include "seven_seg.h"
+#include "gpio.h"
+
+void stop_sw(void * params) {
+    printf("stop switch");
+}
+
+void snooze_sw(void * params) {
+    printf("stop switch");
+}
 
 void app_main(void)
 {
@@ -44,4 +56,23 @@ void app_main(void)
             (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
 
     printf("Free heap: %d\n", esp_get_free_heap_size());
+
+    // 7 segment display config
+    seven_seg_t seven_seg = {
+        .seg_pins = {17, 15, 18, 5, 19, 22, 16},
+        .cathode_pins = {12, 33, 27}
+    };
+
+    seven_seg_init(&seven_seg);
+
+    // gpio peripherals (only the LED)
+    uint8_t peripherals[] = {2};
+
+    gpio_peripheral_init(peripherals, 1);
+
+    // stop switch
+    gpio_switch_init(34, &stop_sw);
+
+    // snooze switch
+    gpio_switch_init(35, &snooze_sw);
 }
