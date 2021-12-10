@@ -19,6 +19,7 @@
 #include "station.h"
 #include "seven_seg.h"
 #include "gpio.h"
+#include "time.h"
 
 void stop_sw(void * params) {
     printf("stop switch");
@@ -41,21 +42,6 @@ void app_main(void)
     printf("Hello world!\n");
     wifi_init_sta();
 
-    /* Print chip information */
-    esp_chip_info_t chip_info;
-    esp_chip_info(&chip_info);
-    printf("This is %s chip with %d CPU cores, WiFi%s%s, ",
-            CONFIG_IDF_TARGET,
-            chip_info.cores,
-            (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
-            (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
-
-    printf("silicon revision %d, ", chip_info.revision);
-
-    printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
-            (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
-
-    printf("Free heap: %d\n", esp_get_free_heap_size());
 
     // 7 segment display config
     seven_seg_t seven_seg = {
@@ -70,9 +56,17 @@ void app_main(void)
 
     gpio_peripheral_init(peripherals, 1);
 
-    // stop switch
-    gpio_switch_init(34, &stop_sw);
+    time_init();
 
-    // snooze switch
-    gpio_switch_init(35, &snooze_sw);
+    while(true) {
+        printf("counter: %d", counter);
+        vTaskDelay(1000);
+    }
+
+    // // stop switch
+    // gpio_switch_init(34, &stop_sw);
+
+    // // snooze switch
+    // gpio_switch_init(35, &snooze_sw);
+
 }

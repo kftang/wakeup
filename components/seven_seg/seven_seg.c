@@ -57,4 +57,9 @@ void seven_seg_init(seven_seg_t * seven_seg) {
     for (int i = 0; i < 7; i++) {
         gpio_set_level(seven_seg->seg_pins[i], 1);
     }
+
+    // set all cathodes off (active high)
+    for (int i = 0; i < 7; i++) {
+        gpio_set_level(seven_seg->cathode_pins[i], 0);
+    }
 }

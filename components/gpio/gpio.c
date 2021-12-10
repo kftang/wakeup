@@ -26,6 +26,11 @@ void gpio_peripheral_init(uint8_t * peripheral_pins, uint8_t num_peripherals) {
         .intr_type = GPIO_INTR_DISABLE
     };
     gpio_config(&io_config);
+
+    // turn off pin initially
+    for (int i = 0; i < num_peripherals; i++) {
+        gpio_set_level(peripheral_pins[i], 0);
+    }
 }
 
 void gpio_switch_init(uint8_t switch_pin, void (*int_handler)(void *)) {
