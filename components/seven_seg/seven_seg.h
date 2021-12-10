@@ -3,6 +3,7 @@
 struct seven_seg {
     uint8_t seg_pins[7];
     uint8_t cathode_pins[3];
+    uint8_t colon_pin;
 };
 typedef struct seven_seg seven_seg_t;
 

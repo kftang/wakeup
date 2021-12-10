@@ -1,7 +1,10 @@
 #include "driver/gpio.h"
+#include "esp_log.h"
 #include <stdint.h>
 
 #include "seven_seg.h"
+
+static const char *TAG = "seven_seg";
 
 static const uint8_t numbers[] = {
         0x3f, // 0b00111111,    // 0
@@ -22,14 +25,29 @@ void seven_seg_set_cathode(seven_seg_t * seven_seg, seven_seg_cathode_t cathode)
         gpio_set_level(seven_seg->cathode_pins[i], 1);
     }
 
+    // control colon with cathode
+    if (cathode == SEVEN_SEGMENT_COLON) {
+        gpio_set_level(seven_seg->colon_pin, 0);
+    }
+
     // set specified cathode high
     gpio_set_level(seven_seg->cathode_pins[cathode], 0);
 }
 
 void seven_seg_set_number(seven_seg_t * seven_seg, uint8_t num) {
+    // set all segments to low first
+    for (int i = 0; i < 7; i++) {
+        gpio_set_level(seven_seg->seg_pins[i], 1);
+    }
+
+    // set segments
     for (int i = 0; i < 7; i++) {
         uint8_t segment_mask = 1 << i;
-        gpio_set_level(seven_seg->seg_pins[i], !(numbers[num] & segment_mask));
+        uint8_t pin_value = !(numbers[num] & segment_mask);
+
+        if (!pin_value) {
+            gpio_set_level(seven_seg->seg_pins[i], pin_value);
+        }
     }
 }
 
@@ -37,11 +55,12 @@ void seven_seg_init(seven_seg_t * seven_seg) {
     // create bitmask for all output pins
     uint64_t output_pins_bitmask = 0;
     for (int i = 0; i < 7; i++) {
-        output_pins_bitmask |= (1 << seven_seg->seg_pins[i]);
+        output_pins_bitmask |= (1uLL << seven_seg->seg_pins[i]);
     }
     for (int i = 0; i < 3; i++) {
-        output_pins_bitmask |= (1 << seven_seg->cathode_pins[i]);
+        output_pins_bitmask |= (1uLL << seven_seg->cathode_pins[i]);
     }
+    output_pins_bitmask |= (1uLL << seven_seg->colon_pin);
 
     // configure gpio pins for output pins
     gpio_config_t io_config = {
@@ -51,15 +70,16 @@ void seven_seg_init(seven_seg_t * seven_seg) {
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE
     };
-    gpio_config(&io_config);
+    ESP_ERROR_CHECK(gpio_config(&io_config));
 
     // set all segments off (active low)
     for (int i = 0; i < 7; i++) {
-        gpio_set_level(seven_seg->seg_pins[i], 1);
+        ESP_ERROR_CHECK(gpio_set_level(seven_seg->seg_pins[i], 1));
     }
+    ESP_ERROR_CHECK(gpio_set_level(seven_seg->colon_pin, 1));
 
     // set all cathodes off (active high)
-    for (int i = 0; i < 7; i++) {
-        gpio_set_level(seven_seg->cathode_pins[i], 0);
+    for (int i = 0; i < 3; i++) {
+        ESP_ERROR_CHECK(gpio_set_level(seven_seg->cathode_pins[i], 0));
     }
 }
