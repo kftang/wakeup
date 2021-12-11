@@ -1,12 +1,16 @@
 #include <driver/dac.h>
 #include <driver/gpio.h>
 
+#include "gpio.h"
+
 void sound_play() {
     dac_cw_generator_enable();
+    gpio_peripheral_on(2);
 }
 
 void sound_stop() {
     dac_cw_generator_disable();
+    gpio_peripheral_off(2);
 }
 
 void sound_init(uint8_t gain0_pin, uint8_t gain1_pin, uint8_t shutdown_pin) {
